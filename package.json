@@ -1,0 +1,43 @@
+{
+  "name": "matchbox",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["./dist"],
+  "scripts": {
+    "build": "tsc",
+    "format": "biome check --write",
+    "lint": "biome check",
+    "test": "vitest run",
+    "ci:version": "changeset version",
+    "ci:publish": "changeset publish"
+  },
+  "author": {
+    "name": "Cristian Petre",
+    "email": "driimus@vivaldi.net"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/driimus/matchbox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/driimus/matchbox/issues"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.1",
+    "@changesets/changelog-github": "^0.5.0",
+    "@changesets/cli": "^2.27.5",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@tsconfig/node20": "^20.1.4",
+    "lefthook": "^1.6.15",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "packageManager": "pnpm@9.3.0+sha256.e1f9e8d1a16607a46dd3c158b5f7a7dc7945501d1c6222d454d63d033d1d918f"
+}
