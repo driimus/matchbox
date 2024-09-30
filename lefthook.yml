@@ -8,5 +8,6 @@ pre-commit:
   commands:
     lint:
       glob: "*.{json,js,ts}"
-      run: pnpm format {staged_files} && git add {staged_files}
+      run: pnpm format {staged_files}
+      stage_fixed: true
   
