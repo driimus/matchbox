@@ -9,7 +9,7 @@
     "build": "tsc",
     "format": "biome check --write",
     "lint": "biome check",
-    "test": "vitest run",
+    "test": "vitest run --typecheck",
     "ci:version": "changeset version",
     "ci:publish": "changeset publish"
   },

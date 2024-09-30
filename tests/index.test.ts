@@ -1,4 +1,4 @@
-import { type Match, matcher } from '../src/index.js';
+import { type Match, MatchNotFoundError, matcher } from '../src/index.js';
 
 const isJSON = (v: unknown) => {
   try {
@@ -22,7 +22,7 @@ describe('matcher', () => {
   ] as const);
 
   test("should error if there's no match", () => {
-    expect(() => match('plain string')).toThrow();
+    expect(() => match('plain string')).toThrow(MatchNotFoundError);
   });
 
   test.each([
@@ -43,5 +43,12 @@ describe('matcher', () => {
     }
 
     expect(matcher(gen())(5)).toBe(output.INT);
+  });
+
+  test('should infer argument types', () => {
+    const match = matcher([
+      ['is odd' as const, (n) => n % 2 !== 0],
+      ['is even' as const, (n) => n % 2 === 0],
+    ] satisfies Match<[number], string>[]);
   });
 });
