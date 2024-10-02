@@ -17,8 +17,8 @@ const output = {
 
 describe('matcher', () => {
   const match = matcher([
-    [output.INT, Number.isInteger],
-    [output.JSON, isJSON],
+    [Number.isInteger, output.INT],
+    [isJSON, output.JSON],
   ] as const);
 
   test("should error if there's no match", () => {
@@ -37,9 +37,9 @@ describe('matcher', () => {
 
   test('should work with iterators', () => {
     function* gen() {
-      yield [-1, (v: number) => v < 0] satisfies Match;
-      yield [0, (v: number) => v === 0] satisfies Match;
-      yield [output.INT, (v: number) => v > 0] satisfies Match;
+      yield [(v: number) => v < 0, -1] satisfies Match;
+      yield [(v: number) => v === 0, 0] satisfies Match;
+      yield [(v: number) => v > 0, output.INT] satisfies Match;
     }
 
     expect(matcher(gen())(5)).toBe(output.INT);
@@ -47,8 +47,8 @@ describe('matcher', () => {
 
   test('should infer argument types', () => {
     const match = matcher([
-      ['is odd' as const, (n) => n % 2 !== 0],
-      ['is even' as const, (n) => n % 2 === 0],
+      [(n) => n % 2 !== 0, 'is odd' as const],
+      [(n) => n % 2 === 0, 'is even' as const],
     ] satisfies Match<[number], string>[]);
   });
 });

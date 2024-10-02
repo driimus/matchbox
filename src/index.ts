@@ -2,14 +2,17 @@ type IterableEntry<T> = T extends Iterable<infer U> ? U : never;
 
 // biome-ignore lint/suspicious/noExplicitAny: any parameter type goes
 export type Match<TArgs extends any[] = any[], TOut = unknown> = [
-  output: TOut,
   predicate: (...args: TArgs) => boolean,
+  output: TOut,
 ];
+
+type MatchArgs<T extends Iterable<Match>> = Parameters<IterableEntry<T>[0]>;
+type MatchOutput<T extends Iterable<Match>> = IterableEntry<T>[1];
 
 export const matcher =
   <T extends Iterable<Match>>(checks: T) =>
-  (...args: Parameters<IterableEntry<T>[1]>): IterableEntry<T>[0] => {
-    for (const [output, predicate] of checks) {
+  (...args: MatchArgs<T>): MatchOutput<T> => {
+    for (const [predicate, output] of checks) {
       if (predicate(...args)) return output;
     }
 
