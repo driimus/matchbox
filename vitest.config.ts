@@ -6,6 +6,7 @@ export default defineConfig({
     silent: true,
     coverage: {
       provider: 'v8',
+      include: ['src'],
       thresholds: {
         branches: 100,
         functions: 100,
