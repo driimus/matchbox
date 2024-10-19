@@ -1,15 +1,32 @@
 type IterableEntry<T> = T extends Iterable<infer U> ? U : never;
 
-// biome-ignore lint/suspicious/noExplicitAny: any parameter type goes
-export type Match<TArgs extends any[] = any[], TOut = unknown> = [
-  predicate: (...args: TArgs) => boolean,
+export type Match<
+  // biome-ignore lint/suspicious/noExplicitAny: function signature contravariance
+  TArgs extends any[] = any[],
+  TOut = unknown,
+  Async extends boolean = false,
+> = [
+  predicate: (
+    ...args: TArgs
+  ) => Async extends true ? Promise<boolean> : boolean,
   output: TOut,
 ];
 
-type MatchArgs<T extends Iterable<Match>> = Parameters<IterableEntry<T>[0]>;
-type MatchOutput<T extends Iterable<Match>> = IterableEntry<T>[1];
+// biome-ignore lint/suspicious/noExplicitAny: function signature contravariance
+export type MatchAsync = Match<any[], unknown, true>;
 
-export const matcher =
+type MatchLike = [(...args: unknown[]) => unknown, unknown];
+
+type MatchArgs<T extends Iterable<MatchLike>> = Parameters<IterableEntry<T>[0]>;
+type MatchOutput<T extends Iterable<MatchLike>> = IterableEntry<T>[1];
+
+export class MatchNotFoundError extends Error {
+  name = 'MatchNotFoundError' as const;
+
+  message = 'Exhaustive match did not return a value.';
+}
+
+export const sync =
   <T extends Iterable<Match>>(checks: T) =>
   (...args: MatchArgs<T>): MatchOutput<T> => {
     for (const [predicate, output] of checks) {
@@ -19,8 +36,25 @@ export const matcher =
     throw new MatchNotFoundError();
   };
 
-export class MatchNotFoundError extends Error {
-  name = 'MatchNotFoundError' as const;
+export const async =
+  <T extends Iterable<MatchAsync>>(checks: T) =>
+  async (...args: MatchArgs<T>): Promise<MatchOutput<T>> =>
+    Promise.any(map(checks, toMatchOutput(args))).catch(() => {
+      throw new MatchNotFoundError();
+    });
 
-  message = 'Exhaustive match did not return a value.';
+export default { sync, async };
+
+const toMatchOutput =
+  (args: unknown[]) =>
+  ([predicate, output]: MatchAsync) =>
+    predicate(...args).then((result) => (result ? output : Promise.reject()));
+
+function* map<T, V>(
+  iterable: Iterable<T>,
+  mapper: (element: T) => V,
+): IterableIterator<V> {
+  for (const value of iterable) {
+    yield mapper(value);
+  }
 }
