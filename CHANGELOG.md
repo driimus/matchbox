@@ -1,5 +1,11 @@
 # matchbox
 
+## 0.2.1
+
+### Patch Changes
+
+- [`2f7d317`](https://github.com/driimus/matchbox/commit/2f7d31710954b4170ca86a46f28e5421a2cdf7b7) Thanks [@driimus](https://github.com/driimus)! - fix(setup): emit type declarations
+
 ## 0.2.0
 
 ### Minor Changes
