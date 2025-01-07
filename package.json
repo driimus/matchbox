@@ -35,7 +35,7 @@
     "@changesets/cli": "^2.27.11",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
-    "@tsconfig/node20": "^20.1.4",
+    "@tsconfig/node-lts": "^22.0.1",
     "@vitest/coverage-v8": "^2.1.8",
     "lefthook": "^1.10.1",
     "typescript": "^5.7.2",
