@@ -1,5 +1,11 @@
 # matchbox
 
+## 0.3.0
+
+### Minor Changes
+
+- [#9](https://github.com/driimus/matchbox/pull/9) [`7aab754`](https://github.com/driimus/matchbox/commit/7aab754db448df6ed049b29419ee98cbd1dcd8f3) Thanks [@driimus](https://github.com/driimus)! - refactor: named export `matchbox` instead of default export
+
 ## 0.2.1
 
 ### Patch Changes
