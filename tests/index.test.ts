@@ -1,7 +1,8 @@
-import matcher, {
+import {
   type Match,
   type MatchAsync,
   MatchNotFoundError,
+  matchbox,
 } from '../src/index.js';
 
 // biome-ignore lint/suspicious/noExplicitAny: don't care
@@ -19,9 +20,9 @@ const output = {
   JSON: Symbol('JSON'),
 };
 
-describe('matcher', () => {
+describe('matchbox', () => {
   describe('#sync', () => {
-    const match = matcher.sync([
+    const match = matchbox.sync([
       [Number.isInteger, output.INT],
       [isJSON, output.JSON],
     ] as const);
@@ -47,7 +48,7 @@ describe('matcher', () => {
         yield [(v: number) => v > 0, output.INT] satisfies Match;
       }
 
-      expect(matcher.sync(gen())(5)).toBe(output.INT);
+      expect(matchbox.sync(gen())(5)).toBe(output.INT);
     });
   });
 
@@ -57,7 +58,7 @@ describe('matcher', () => {
         <TArgs extends any[], TReturn>(fn: (...args: TArgs) => TReturn) =>
         async (...args: TArgs) =>
           fn(...args);
-    const match = matcher.async([
+    const match = matchbox.async([
       [asyncify(Number.isInteger), output.INT],
       [asyncify(isJSON), output.JSON],
     ] as const);
@@ -86,7 +87,7 @@ describe('matcher', () => {
         yield [async (v: number) => v > 0, output.INT] satisfies MatchAsync;
       }
 
-      await expect(matcher.async(gen())(5)).resolves.toBe(output.INT);
+      await expect(matchbox.async(gen())(5)).resolves.toBe(output.INT);
     });
   });
 });

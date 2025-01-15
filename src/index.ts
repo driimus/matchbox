@@ -43,7 +43,7 @@ export const async =
       throw new MatchNotFoundError();
     });
 
-export default { sync, async };
+export const matchbox = { sync, async };
 
 const toMatchOutput =
   (args: unknown[]) =>

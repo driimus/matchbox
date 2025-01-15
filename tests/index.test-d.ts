@@ -1,9 +1,9 @@
-import matcher, { type Match } from '../src/index.js';
+import { type Match, matchbox } from '../src/index.js';
 
-describe('matcher', () => {
-  describe('#async', () => {
+describe('matchbox', () => {
+  describe('#sync', () => {
     test('should infer function signature types', () => {
-      const match = matcher.sync([
+      const match = matchbox.sync([
         [(n) => n % 2 !== 0, 'is odd' as const],
         [(n) => n % 2 === 0, 'is even' as const],
       ] satisfies Match<[number], string>[]);
@@ -15,7 +15,7 @@ describe('matcher', () => {
 
   describe('#async', () => {
     test('should infer function signature types', () => {
-      const match = matcher.async([
+      const match = matchbox.async([
         [async (n) => n % 2 !== 0, 'is odd' as const],
         [async (n) => n % 2 === 0, 'is even' as const],
       ] satisfies Match<[number], string, true>[]);
