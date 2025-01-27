@@ -1,6 +1,8 @@
-# matchbox
+# `@driimus/matchbox`
 
-All-purpose matchers in JS
+A minimalist implementation of type-aware matching based on generic predicates.
+
+Looking for a fully fledged solution for pattern matching? Check out [ts-pattern](https://github.com/gvergnaud/ts-pattern).
 
 ## Installation
 
@@ -20,9 +22,9 @@ Synchronous matching evaluates each predicates in order until a match is found.
 import { matchbox } from '@driimus/matchbox';
 
 const match = matchbox.sync([
-    [(x) => x === 0, 'none'],
-    [(x) => x > 0 && x <= 9, 'a few'],
-    [() => true, 'lots'],
+  [(x) => x === 0, 'none'],
+  [(x) => x > 0 && x <= 9, 'a few'],
+  [() => true, 'lots'],
 ]);
 
 console.log(match(5)); // 'a few'
@@ -30,23 +32,24 @@ console.log(match(5)); // 'a few'
 
 ### `async`
 
-Asynchronous matching evaluates predicates concurrently and resolves with the first fulfilled match.
+Just like [`Promise.any`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/any), asynchronous matching evaluates predicates concurrently and resolves with the first fulfilled match.
 
 ```ts
-import { matchbox } from "@driimus/matchbox";
+import { matchbox } from '@driimus/matchbox';
 
 const match = matchbox.async([
-  [async (x) => x === 0, "none"],
-  [async (x) => x > 0 && x <= 9, "a few"],
-  [async (x) => x > 10, "lots"],
+  [async (x) => x === 0, 'none'],
+  [async (x) => x > 0 && x <= 9, 'a few'],
   [
     async (x) =>
       new Promise((resolve, reject) =>
-        setTimeout(x > 50 ? resolve : reject, 10_000)
+        setTimeout(x > 10 ? resolve : reject, 1_000),
       ),
-    "too many",
+    'lots',
   ],
+  [async (x) => x > 50, 'too many'],
 ]);
 
-console.log(await match(99)); // 'lots'
+console.log(await match(99)); // 'too many', which resolves before 'lots'
+
 ```
