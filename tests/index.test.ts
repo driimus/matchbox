@@ -5,7 +5,7 @@ import {
   matchbox,
 } from '../src/index.js';
 
-// biome-ignore lint/suspicious/noExplicitAny: don't care
+// biome-ignore lint/suspicious/noExplicitAny: don't care about test files
 const isJSON = (v: any) => {
   try {
     JSON.parse(v);
@@ -54,7 +54,7 @@ describe('matchbox', () => {
 
   describe('#async', () => {
     const asyncify =
-      // biome-ignore lint/suspicious/noExplicitAny:
+      // biome-ignore lint/suspicious/noExplicitAny: don't care about test files
         <TArgs extends any[], TReturn>(fn: (...args: TArgs) => TReturn) =>
         async (...args: TArgs) =>
           fn(...args);

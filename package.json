@@ -4,7 +4,9 @@
   "type": "module",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["./dist"],
+  "files": [
+    "./dist"
+  ],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "tsc",
@@ -30,7 +32,7 @@
     "url": "https://github.com/driimus/matchbox/issues"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.0.0",
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.11",
     "@commitlint/cli": "^19.6.1",
@@ -41,7 +43,7 @@
     "typescript": "^5.7.2",
     "vitest": "^3.0.0"
   },
-  "packageManager": "pnpm@10.2.1",
+  "packageManager": "pnpm@10.12.1+sha256.889bac470ec93ccc3764488a19d6ba8f9c648ad5e50a9a6e4be3768a5de387a3",
   "engines": {
     "node": ">=20"
   }
