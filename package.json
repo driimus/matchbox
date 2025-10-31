@@ -38,10 +38,10 @@
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@tsconfig/node-lts": "^22.0.1",
-    "@vitest/coverage-v8": "^3.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
     "lefthook": "^2.0.0",
     "typescript": "^5.7.2",
-    "vitest": "^3.0.0"
+    "vitest": "^4.0.0"
   },
   "packageManager": "pnpm@10.12.1+sha256.889bac470ec93ccc3764488a19d6ba8f9c648ad5e50a9a6e4be3768a5de387a3",
   "engines": {
