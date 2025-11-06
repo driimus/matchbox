@@ -50,6 +50,14 @@ describe('matchbox', () => {
 
       expect(matchbox.sync(gen())(5)).toBe(output.INT);
     });
+
+    test('should evaluate matched function output', () => {
+      const match = matchbox.sync([
+        [(n: number) => n % 2 === 0, (n: number) => n * 2],
+      ] as const);
+
+      expect(match(4)).toBe(8);
+    });
   });
 
   describe('#async', () => {

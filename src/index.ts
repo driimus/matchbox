@@ -9,7 +9,7 @@ export type Match<
   predicate: (
     ...args: TArgs
   ) => Async extends true ? Promise<boolean> : boolean,
-  output: TOut,
+  output: TOut | ((...args: TArgs) => TOut),
 ];
 
 // biome-ignore lint/suspicious/noExplicitAny: function signature contravariance
@@ -20,6 +20,10 @@ type MatchLike = [(...args: unknown[]) => unknown, unknown];
 type MatchArgs<T extends Iterable<MatchLike>> = Parameters<IterableEntry<T>[0]>;
 type MatchOutput<T extends Iterable<MatchLike>> = IterableEntry<T>[1];
 
+type Unwrapped<T> = T extends (...args: unknown[]) => unknown
+  ? ReturnType<T>
+  : T;
+
 export class MatchNotFoundError extends Error {
   name = 'MatchNotFoundError' as const;
 
@@ -28,12 +32,25 @@ export class MatchNotFoundError extends Error {
 
 export const sync =
   <T extends Iterable<Match>>(checks: T) =>
-  (...args: MatchArgs<T>): MatchOutput<T> => {
+  (...args: MatchArgs<T>): Unwrapped<MatchOutput<T>> => {
+    const result: { found: boolean; value: MatchOutput<T> | undefined } = {
+      value: undefined,
+      found: false,
+    };
+
     for (const [predicate, output] of checks) {
-      if (predicate(...args)) return output;
+      if (predicate(...args)) {
+        result.value = output;
+        result.found = true;
+        break;
+      }
     }
 
-    throw new MatchNotFoundError();
+    if (!result.found) throw new MatchNotFoundError();
+
+    return (
+      typeof result.value === 'function' ? result.value(...args) : result.value
+    ) as Unwrapped<MatchOutput<T>>;
   };
 
 export const async =
