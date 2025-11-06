@@ -4,8 +4,14 @@
   "type": "module",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["./dist"],
-  "keywords": ["typescript", "pattern", "matching"],
+  "files": [
+    "./dist"
+  ],
+  "keywords": [
+    "typescript",
+    "pattern",
+    "matching"
+  ],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "tsc",
@@ -44,6 +50,6 @@
   },
   "packageManager": "pnpm@10.20.0+sha256.47a3352808501b8d1ef20112273b6a5dcfa53d28a55bcce36d268e878bd6bfe9",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   }
 }
