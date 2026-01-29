@@ -1,5 +1,11 @@
 # matchbox
 
+## 0.4.0
+
+### Minor Changes
+
+- [#19](https://github.com/driimus/matchbox/pull/19) [`6241b9c`](https://github.com/driimus/matchbox/commit/6241b9cec91bc4ca454a5884c90d7fdeba6a9ec4) Thanks [@driimus](https://github.com/driimus)! - feat(deps): require active lts version of node
+
 ## 0.3.0
 
 ### Minor Changes
