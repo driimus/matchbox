@@ -16,7 +16,7 @@ Matcher functions are created by providing an array of tuples, where each entry 
 
 ### `sync`
 
-Synchronous matching evaluates each predicates in order until a match is found.
+Synchronous matching evaluates each predicate in order until a match is found.
 
 ```ts
 import { matchbox } from '@driimus/matchbox';
