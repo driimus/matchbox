@@ -43,9 +43,12 @@ describe('matchbox', () => {
 
     test('should work with iterators', () => {
       function* gen() {
-        yield [(v: number) => v < 0, -1] satisfies Match;
-        yield [(v: number) => v === 0, 0] satisfies Match;
-        yield [(v: number) => v > 0, output.INT] satisfies Match;
+        yield [(v: number) => v < 0, -1] satisfies Match<number, number>;
+        yield [(v: number) => v === 0, 0] satisfies Match<number, number>;
+        yield [(v: number) => v > 0, output.INT] satisfies Match<
+          number,
+          symbol
+        >;
       }
 
       expect(matchbox.sync(gen())(5)).toBe(output.INT);
@@ -53,19 +56,34 @@ describe('matchbox', () => {
 
     test('should evaluate matched function output', () => {
       const match = matchbox.sync([
-        [(n: number) => n % 2 === 0, (n: number) => n * 2],
+        [(n: number) => n % 2 === 0, (n) => n * 2],
       ] as const);
 
       expect(match(4)).toBe(8);
+    });
+
+    test('should pass narrowed value to function output for type guards', () => {
+      const match = matchbox.sync([
+        [
+          (x: unknown): x is string => typeof x === 'string',
+          (s) => s.toUpperCase(),
+        ],
+        [
+          (x: unknown): x is number => typeof x === 'number',
+          (n) => n.toFixed(2),
+        ],
+      ] as const);
+
+      expect(match('hi')).toBe('HI');
+      expect(match(Math.PI)).toBe('3.14');
     });
   });
 
   describe('#async', () => {
     const asyncify =
-      // biome-ignore lint/suspicious/noExplicitAny: don't care about test files
-        <TArgs extends any[], TReturn>(fn: (...args: TArgs) => TReturn) =>
-        async (...args: TArgs) =>
-          fn(...args);
+      <T, TReturn>(fn: (value: T) => TReturn) =>
+      async (value: T) =>
+        fn(value);
     const match = matchbox.async([
       [asyncify(Number.isInteger), output.INT],
       [asyncify(isJSON), output.JSON],
@@ -90,12 +108,29 @@ describe('matchbox', () => {
 
     test('should work with iterators', async () => {
       function* gen() {
-        yield [async (v: number) => v < 0, -1] satisfies MatchAsync;
-        yield [async (v: number) => v === 0, 0] satisfies MatchAsync;
-        yield [async (v: number) => v > 0, output.INT] satisfies MatchAsync;
+        yield [async (v: number) => v < 0, -1] satisfies MatchAsync<
+          number,
+          number
+        >;
+        yield [async (v: number) => v === 0, 0] satisfies MatchAsync<
+          number,
+          number
+        >;
+        yield [async (v: number) => v > 0, output.INT] satisfies MatchAsync<
+          number,
+          symbol
+        >;
       }
 
       await expect(matchbox.async(gen())(5)).resolves.toBe(output.INT);
+    });
+
+    test('should evaluate matched function output', async () => {
+      const match = matchbox.async([
+        [async (n: number) => n % 2 === 0, (n) => n * 2],
+      ] as const);
+
+      await expect(match(4)).resolves.toBe(8);
     });
   });
 });

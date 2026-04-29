@@ -1,28 +1,58 @@
 type IterableEntry<T> = T extends Iterable<infer U> ? U : never;
 
-export type Match<
-  // biome-ignore lint/suspicious/noExplicitAny: function signature contravariance
-  TArgs extends any[] = any[],
-  TOut = unknown,
-  Async extends boolean = false,
-> = [
-  predicate: (
-    ...args: TArgs
-  ) => Async extends true ? Promise<boolean> : boolean,
-  output: TOut | ((...args: TArgs) => TOut),
+type SyncPredicate<T = unknown, U extends T = T> =
+  | ((value: T) => boolean)
+  | ((value: T) => value is U);
+
+type AsyncPredicate<T = unknown> = (value: T) => Promise<boolean>;
+
+export type Match<T = unknown, TOut = unknown, U extends T = T> = readonly [
+  predicate: SyncPredicate<T, U>,
+  output: TOut | ((value: U) => TOut),
 ];
 
+export type MatchAsync<T = unknown, TOut = unknown> = readonly [
+  predicate: AsyncPredicate<T>,
+  output: TOut | ((value: T) => TOut),
+];
+
+// biome-ignore lint/suspicious/noExplicitAny: predicate signature contravariance
+type SyncCheckLike = readonly [(value: any) => boolean, unknown];
+
+type GuardNarrow<P> = P extends (
+  // biome-ignore lint/suspicious/noExplicitAny: function signature contravariance
+  value: any,
+) => value is infer N
+  ? N
+  : never;
+
+type ConstrainSyncCheck<E> = E extends readonly [infer P, infer O]
+  ? [GuardNarrow<P>] extends [never]
+    ? P extends (value: infer V) => boolean
+      ? readonly [
+          P,
+          // biome-ignore lint/suspicious/noExplicitAny: function signature contravariance
+          O extends (...args: any) => any ? (value: V) => unknown : O,
+        ]
+      : never
+    : readonly [
+        P,
+        // biome-ignore lint/suspicious/noExplicitAny: function signature contravariance
+        O extends (...args: any) => any
+          ? (value: GuardNarrow<P>) => unknown
+          : O,
+      ]
+  : never;
+
 // biome-ignore lint/suspicious/noExplicitAny: function signature contravariance
-export type MatchAsync = Match<any[], unknown, true>;
+type PredicateInput<P> = P extends (value: infer V) => any ? V : never;
 
-type MatchLike = [(...args: unknown[]) => unknown, unknown];
-
-type MatchArgs<T extends Iterable<MatchLike>> = Parameters<IterableEntry<T>[0]>;
-type MatchOutput<T extends Iterable<MatchLike>> = IterableEntry<T>[1];
-
-type Unwrapped<T> = T extends (...args: unknown[]) => unknown
-  ? ReturnType<T>
-  : T;
+type OutputValue<O> = O extends (
+  // biome-ignore lint/suspicious/noExplicitAny: function signature contravariance
+  ...args: any
+) => infer R
+  ? R
+  : O;
 
 export class MatchNotFoundError extends Error {
   name = 'MatchNotFoundError' as const;
@@ -30,42 +60,48 @@ export class MatchNotFoundError extends Error {
   message = 'Exhaustive match did not return a value.';
 }
 
-export const sync =
-  <T extends Iterable<Match>>(checks: T) =>
-  (...args: MatchArgs<T>): Unwrapped<MatchOutput<T>> => {
-    const result: { found: boolean; value: MatchOutput<T> | undefined } = {
-      value: undefined,
-      found: false,
-    };
-
+export function sync<const Checks extends readonly SyncCheckLike[]>(
+  checks: Checks & { [K in keyof Checks]: ConstrainSyncCheck<Checks[K]> },
+): (value: PredicateInput<Checks[number][0]>) => OutputValue<Checks[number][1]>;
+export function sync<T extends Iterable<Match>>(
+  checks: T,
+): (
+  value: PredicateInput<IterableEntry<T>[0]>,
+) => OutputValue<IterableEntry<T>[1]>;
+export function sync(checks: Iterable<Match>) {
+  return (value: unknown): unknown => {
     for (const [predicate, output] of checks) {
-      if (predicate(...args)) {
-        result.value = output;
-        result.found = true;
-        break;
+      if (predicate(value)) {
+        return typeof output === 'function'
+          ? (output as (v: unknown) => unknown)(value)
+          : output;
       }
     }
-
-    if (!result.found) throw new MatchNotFoundError();
-
-    return (
-      typeof result.value === 'function' ? result.value(...args) : result.value
-    ) as Unwrapped<MatchOutput<T>>;
+    throw new MatchNotFoundError();
   };
+}
 
 export const async =
   <T extends Iterable<MatchAsync>>(checks: T) =>
-  async (...args: MatchArgs<T>): Promise<MatchOutput<T>> =>
-    Promise.any(map(checks, toMatchOutput(args))).catch(() => {
+  (
+    value: PredicateInput<IterableEntry<T>[0]>,
+  ): Promise<OutputValue<IterableEntry<T>[1]>> =>
+    Promise.any(map(checks, toMatchOutput(value))).catch(() => {
       throw new MatchNotFoundError();
-    });
+    }) as Promise<OutputValue<IterableEntry<T>[1]>>;
 
 export const matchbox = { sync, async };
 
 const toMatchOutput =
-  (args: unknown[]) =>
+  (value: unknown) =>
   ([predicate, output]: MatchAsync) =>
-    predicate(...args).then((result) => (result ? output : Promise.reject()));
+    predicate(value).then((ok) =>
+      ok
+        ? typeof output === 'function'
+          ? (output as (v: unknown) => unknown)(value)
+          : output
+        : Promise.reject(),
+    );
 
 function* map<T, V>(
   iterable: Iterable<T>,
